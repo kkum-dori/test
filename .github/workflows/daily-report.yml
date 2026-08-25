@@ -22,8 +22,21 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run monitor script
+        id: monitor
         env:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
-          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
+          KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
         run: python monitor.py
+
+      # 카카오가 새 리프레시 토큰을 내려준 경우에만 실행됩니다.
+      # GH_PAT: Settings > Developer settings > Personal access tokens에서
+      #         'repo' 권한(또는 fine-grained: Secrets 읽기/쓰기)으로 발급한 토큰을
+      #         GH_PAT 라는 이름의 Secret으로 등록해야 합니다.
+      - name: Rotate KAKAO_REFRESH_TOKEN secret if renewed
+        if: steps.monitor.outputs.new_refresh_token != ''
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          echo "${{ steps.monitor.outputs.new_refresh_token }}" | \
+            gh secret set KAKAO_REFRESH_TOKEN --repo "${{ github.repository }}"

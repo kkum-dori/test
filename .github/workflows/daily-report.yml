@@ -3,7 +3,7 @@ name: 329200 Daily Report
 on:
   schedule:
     # 매일 UTC 23:00 = 한국시간(KST) 다음날 08:00
-    - cron: "50 1 * * *"
+    - cron: "43 1 * * *"
   workflow_dispatch: {}  # Actions 탭에서 수동 실행도 가능
 
 jobs:
